@@ -17,7 +17,7 @@ describe "Dockerfile" do
 
   before(:all) do
     image = Docker::Image.build_from_dir('.', {
-      't': 'docker.sandbox.dwolla.net/dwolla/java:8'
+      't' => 'docker.sandbox.dwolla.net/dwolla/java:8'
     })
 
     set :os, family: :debian
