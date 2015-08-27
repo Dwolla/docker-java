@@ -2,6 +2,8 @@ require "serverspec"
 require "docker"
 require "multi_json"
 
+DOCKER_IMAGE_TAG = 'jenkins-linux.dwolla.net/dwolla/java:8'
+
 describe "Dockerfile" do
   it "sets DNS TTL to 60" do
     expect(java_security).to include("networkaddress.cache.ttl=60")
@@ -17,14 +19,14 @@ describe "Dockerfile" do
 
   before(:all) do
     image = Docker::Image.build_from_dir('.', {
-      't' => 'docker.sandbox.dwolla.net/dwolla/java:8'
+      't' => DOCKER_IMAGE_TAG
     })
 
     set :os, family: :debian
     set :backend, :docker
     set :docker_image, image.id
 
-    @image_id = image.id
+    @image = image
   end
 
   def os_version
@@ -40,7 +42,7 @@ describe "Dockerfile" do
   end
 
   def image_inspection
-    ::MultiJson.load(`docker inspect #{@image_id}`)[0]
+    ::MultiJson.load(`docker inspect #{@image.id}`)[0]
   end
 end
 
