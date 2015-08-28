@@ -4,7 +4,7 @@ require "multi_json"
 
 DOCKER_IMAGE_TAG = 'jenkins-linux.dwolla.net/dwolla/java:8'
 
-describe "Dockerfile" do
+describe "docker.dwolla.com/dwolla/java:8" do
   it "sets DNS TTL to 60" do
     expect(java_security).to include("networkaddress.cache.ttl=60")
   end

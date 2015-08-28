@@ -1,5 +1,2 @@
-*.md
-.gitignore
-spec/
-Gemfile*
-
+!Dockerfile
+*
