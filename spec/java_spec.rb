@@ -17,6 +17,10 @@ describe "docker.dwolla.com/dwolla/java:8" do
     expect(image_inspection['Author']).to eq 'Dwolla Engineering <dev+docker@dwolla.com>'
   end
 
+  it "contains the Dockerfile at /Dockerfile" do
+    expect(file("/Dockerfile").content).to eq File.read("Dockerfile")
+  end
+
   before(:all) do
     image = Docker::Image.build_from_dir('.', {
       't' => DOCKER_IMAGE_TAG
