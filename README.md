@@ -2,8 +2,6 @@
 
 Starting from the official [`java:8-jre`](https://github.com/docker-library/java/blob/master/openjdk-8-jre/Dockerfile) image, the `Dockerfile` modifies the JRE’s `java.security` settings to set the DNS TTL to 60 seconds.
 
-CI will publish this image as `docker.dwolla.com/dwolla/java:8`.
-
 ## Dependencies
 1. Run bundler to install any needed gems.
 
