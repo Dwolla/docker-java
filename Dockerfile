@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.2
 MAINTAINER Dwolla Engineering <dev+docker@dwolla.com>
 
 RUN echo http://dl-4.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
