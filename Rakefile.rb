@@ -1,11 +1,9 @@
 require 'rake'
 require 'rspec/core/rake_task'
 
-DOCKER_REPOSITORY = ENV["DOCKER_REPOSITORY"] || "docker.sandbox.dwolla.net" 
 SHORT_IMAGE_NAME = "dwolla/java"
 IMAGE_VERSION = "8"
-IMAGE_NAME_WOUT_VERSION = "#{DOCKER_REPOSITORY}/#{SHORT_IMAGE_NAME}"
-IMAGE_NAME = "#{IMAGE_NAME_WOUT_VERSION}:#{IMAGE_VERSION}"
+IMAGE_NAME = "#{SHORT_IMAGE_NAME}:#{IMAGE_VERSION}"
 
 desc "Default task: Build Docker image, run tests"
 task :default => :spec
@@ -22,9 +20,10 @@ task :build do
   sh "docker build --tag #{IMAGE_NAME} ."
 end
 
-desc "Push Docker image to repository"
+desc "Publish to GitHub, where the automated Docker build will take place"
 task :publish => :spec do
-  sh "docker push #{IMAGE_NAME}"
+  sh "if ! (git remote | fgrep github > /dev/null); then git remote add github git@github.com:Dwolla/docker-java.git; fi && \
+      git push github HEAD:master"
 end
 
 desc "Clean up artifacts and local Docker images"
@@ -35,5 +34,5 @@ task :clean do
 end
 
 def images
-  `docker images | fgrep #{IMAGE_NAME_WOUT_VERSION} | awk '{if ($2 == #{IMAGE_VERSION}) print $3}' | awk ' !x[$0]++' | paste -sd ' ' -`
+  `docker images | fgrep #{SHORT_IMAGE_NAME} | awk '{if ($2 == #{IMAGE_VERSION}) print $3}' | awk ' !x[$0]++' | paste -sd ' ' -`
 end
