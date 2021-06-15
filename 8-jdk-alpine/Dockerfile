@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:17-jdk-alpine
 MAINTAINER Dwolla Engineering <dev+docker@dwolla.com>
 LABEL org.label-schema.vcs-url="https://github.com/Dwolla/docker-java"
 
