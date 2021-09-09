@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk
+FROM eclipse-temurin:8-jdk
 MAINTAINER Dwolla Engineering <dev+docker@dwolla.com>
 LABEL org.label-schema.vcs-url="https://github.com/Dwolla/docker-java"
 
