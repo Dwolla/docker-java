@@ -8,27 +8,12 @@ on:
     tags: [v*]
 
 jobs:
-  build-jre:
+  build:
     strategy:
       matrix:
         temurin_tag:
           - 8u322-b06-jre
           - 11.0.14.1_1-jre
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - uses: ./.github/actions/build
-        with:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          TEMURIN_TAG: ${{ matrix.temurin_tag }}
-          IMAGE: jre
-
-  build-jdk:
-    strategy:
-      matrix:
-        temurin_tag:
           - 8u322-b06-jdk
           - 11.0.14.1_1-jdk
     runs-on: ubuntu-latest
@@ -40,4 +25,3 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           TEMURIN_TAG: ${{ matrix.temurin_tag }}
-          IMAGE: jdk
