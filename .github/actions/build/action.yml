@@ -44,7 +44,7 @@ runs:
           dwolla/java
         # Docker tags based on the following events/attributes
         tags: |
-          type=sha,suffix=--${{ inputs.TEMURIN_TAG }}
+          type=sha,prefix=${{ inputs.TEMURIN_TAG }}-
     # https://github.com/docker/build-push-action
     - name: Build and push
       uses: docker/build-push-action@v2
