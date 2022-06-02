@@ -28,4 +28,6 @@ jobs:
           TEMURIN_TAG: ${{ matrix.temurin_tag }}
       - name: Active Snyk Project
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: ./scripts/activate-snyk-project.sh ${{ secrets.SNYK_TOKEN }} java ${{ matrix.temurin_tag }} $(git rev-parse --short "$GITHUB_SHA")
+        run: ./scripts/activate-snyk-project.sh java ${{ matrix.temurin_tag }} $(git rev-parse --short "$GITHUB_SHA")
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
