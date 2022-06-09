@@ -17,6 +17,7 @@ RUN if [ -f "$JAVA_HOME/jre/lib/security/java.security" ] ; then \
     fi && \
     apt-get update && \
     apt-get install -y bash && \
+    apt-get install -y netcat && \
     sed -i s_#networkaddress.cache.ttl=-1_networkaddress.cache.ttl=60_ $SECURITY_FILE_PATH && \
     sed -i s_securerandom.source=file:/dev/random_securerandom.source=file:/dev/./urandom_ $SECURITY_FILE_PATH && \
     apt-get clean && \
