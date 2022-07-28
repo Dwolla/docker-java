@@ -21,13 +21,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build and Push Docker Image
-        uses: ./.github/actions/build
+        uses: Dwolla/jenkins-agents-workflow/.github/actions/build@main
         with:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          TEMURIN_TAG: ${{ matrix.temurin_tag }}
+          BASE_TAG: ${{ matrix.TEMURIN_TAG }}
+          TAG_NAME: TEMURIN_TAG
+          IMAGE_NAME: dwolla/java
       - name: Active Snyk Project
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
         run: ./scripts/activate-snyk-project.sh java ${{ matrix.temurin_tag }} $(git rev-parse --short "$GITHUB_SHA")
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  build-complete:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The build completed successfully"
