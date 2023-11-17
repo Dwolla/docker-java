@@ -12,10 +12,8 @@ jobs:
     strategy:
       matrix:
         temurin_tag:
-          - 8u322-b06-jre
-          - 11.0.14.1_1-jre
-          - 8u322-b06-jdk
-          - 11.0.14.1_1-jdk
+          - 11.0.21_9-jre
+          - 11.0.21_9-jdk
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
