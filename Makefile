@@ -1,4 +1,5 @@
-TEMURIN_TAGS := 8u322-b06-jdk 11.0.14.1_1-jdk 8u322-b06-jre 11.0.14.1_1-jre
+# this makefile requires yq be installed! brew install yq
+TEMURIN_TAGS := $(shell yq -r '.jobs.build.strategy.matrix.temurin_tag | .[]' .github/workflows/ci.yml | tr '\n' ' ')
 JOBS := $(addprefix temurin-,${TEMURIN_TAGS})
 CHECKS := $(addprefix check-,${TEMURIN_TAGS})
 CLEAN := $(addprefix clean-,${TEMURIN_TAGS})
