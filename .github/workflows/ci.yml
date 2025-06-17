@@ -12,8 +12,13 @@ jobs:
     strategy:
       matrix:
         temurin_tag:
-          - 11.0.21_9-jre
-          - 11.0.21_9-jdk
+          - 11.0.27_6-jre
+          - 11.0.27_6-jdk
+          - 17.0.15_6-jre
+          - 17.0.15_6-jdk
+          - 21.0.7_6-jre
+          - 21.0.7_6-jdk
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
