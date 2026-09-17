@@ -12,12 +12,14 @@ jobs:
     strategy:
       matrix:
         temurin_tag:
-          - 11.0.27_6-jre
-          - 11.0.27_6-jdk
-          - 17.0.15_6-jre
-          - 17.0.15_6-jdk
-          - 21.0.7_6-jre
-          - 21.0.7_6-jdk
+          - 11.0.32_9-jre
+          - 11.0.32_9-jdk
+          - 17.0.20_8-jre
+          - 17.0.20_8-jdk
+          - 21.0.12_8-jre
+          - 21.0.12_8-jdk
+          - 25.0.4_7-jre
+          - 25.0.4_7-jdk
 
     runs-on: ubuntu-latest
     steps:
