@@ -54,6 +54,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
   build-complete:
     needs: build
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - run: echo "The build completed successfully"
+      - run: '[ "${{ needs.build.result }}" = "success" ]'
