@@ -16,7 +16,7 @@ ${JOBS}: temurin-%: Dockerfile
 	  .
 
 ${CHECKS}: check-%:
-	grep --silent "^          - $*$$" .github/workflows/ci.yml
+	test "$$(grep -c "^          - $*$$" .github/workflows/ci.yml)" -eq 2
 
 ${CLEAN}: clean-%:
 	docker rmi dwolla/docker-java:$*-SNAPSHOT --force
