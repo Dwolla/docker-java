@@ -4,24 +4,34 @@ on:
   pull_request:
     branches: ['**']
   push:
-    branches: ['**']
+    branches: [main]
     tags: [v*]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  tags:
+    runs-on: ubuntu-latest
+    outputs:
+      temurin_tags: ${{ steps.read.outputs.temurin_tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Read Temurin Tags
+        id: read
+        run: echo "temurin_tags=$(jq -c . temurin-tags.json)" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: tags
     strategy:
       matrix:
-        temurin_tag:
-          - 11.0.32_9-jre
-          - 11.0.32_9-jdk
-          - 17.0.20_8-jre
-          - 17.0.20_8-jdk
-          - 21.0.12_8-jre
-          - 21.0.12_8-jdk
-          - 25.0.4_7-jre
-          - 25.0.4_7-jdk
+        temurin_tag: ${{ fromJSON(needs.tags.outputs.temurin_tags) }}
 
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: dwolla/java
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,16 +40,44 @@ jobs:
         with:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          BASE_TAG: ${{ matrix.TEMURIN_TAG }}
+          BASE_TAG: ${{ matrix.temurin_tag }}
           TAG_NAME: TEMURIN_TAG
           IMAGE_NAME: dwolla/java
-      - name: Active Snyk Project
+      - name: Set up Snyk CLI
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: ./scripts/activate-snyk-project.sh java ${{ matrix.temurin_tag }} $(git rev-parse --short "$GITHUB_SHA")
+        uses: snyk/actions/setup@master
+      - name: Snyk Container Monitor
+        if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
+        run: snyk container monitor "$IMAGE_NAME:${{ matrix.temurin_tag }}-${GITHUB_SHA::7}" --file=Dockerfile --org=dwolla
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  scan:
+    needs: tags
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        temurin_tag: ${{ fromJSON(needs.tags.outputs.temurin_tags) }}
+
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: dwolla/java
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Snyk CLI
+        uses: snyk/actions/setup@master
+      - name: Build Image For Scanning
+        run: docker buildx build --load --platform linux/amd64 --build-arg TEMURIN_TAG=${{ matrix.temurin_tag }} --tag "$IMAGE_NAME:scan" .
+      - name: Snyk Container Test
+        run: snyk container test "$IMAGE_NAME:scan" --file=Dockerfile --org=dwolla --severity-threshold=high --fail-on=upgradable
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
   build-complete:
     needs: build
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - run: echo "The build completed successfully"
+      - run: '[ "${{ needs.build.result }}" = "success" ]'
