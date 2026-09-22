@@ -36,11 +36,11 @@ jobs:
           TAG_NAME: TEMURIN_TAG
           IMAGE_NAME: dwolla/java
       - name: Set up Snyk CLI
-        if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
         uses: snyk/actions/setup@master
+      - name: Build Image For Scanning
+        run: docker buildx build --load --platform linux/amd64 --build-arg TEMURIN_TAG=${{ matrix.temurin_tag }} --tag "$IMAGE_NAME:scan" .
       - name: Snyk Container Test
-        if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: snyk container test "$IMAGE_NAME:${{ matrix.temurin_tag }}-${GITHUB_SHA::7}" --file=Dockerfile --org=dwolla || true
+        run: snyk container test "$IMAGE_NAME:scan" --file=Dockerfile --org=dwolla || true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Snyk Container Monitor
