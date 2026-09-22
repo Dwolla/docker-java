@@ -22,6 +22,8 @@ jobs:
           - 25.0.4_7-jdk
 
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: dwolla/java
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,9 +35,17 @@ jobs:
           BASE_TAG: ${{ matrix.TEMURIN_TAG }}
           TAG_NAME: TEMURIN_TAG
           IMAGE_NAME: dwolla/java
-      - name: Active Snyk Project
+      - name: Set up Snyk CLI
         if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
-        run: ./scripts/activate-snyk-project.sh java ${{ matrix.temurin_tag }} $(git rev-parse --short "$GITHUB_SHA")
+        uses: snyk/actions/setup@master
+      - name: Snyk Container Test
+        if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
+        run: snyk container test "$IMAGE_NAME:${{ matrix.temurin_tag }}-${GITHUB_SHA::7}" --file=Dockerfile --org=dwolla || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Snyk Container Monitor
+        if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
+        run: snyk container monitor "$IMAGE_NAME:${{ matrix.temurin_tag }}-${GITHUB_SHA::7}" --file=Dockerfile --org=dwolla
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
   build-complete:
