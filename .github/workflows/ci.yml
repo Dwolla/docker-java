@@ -12,18 +12,22 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  tags:
+    runs-on: ubuntu-latest
+    outputs:
+      temurin_tags: ${{ steps.read.outputs.temurin_tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Read Temurin Tags
+        id: read
+        run: echo "temurin_tags=$(jq -c . temurin-tags.json)" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: tags
     strategy:
       matrix:
-        temurin_tag:
-          - 11.0.32_9-jre
-          - 11.0.32_9-jdk
-          - 17.0.20_8-jre
-          - 17.0.20_8-jdk
-          - 21.0.12_8-jre
-          - 21.0.12_8-jdk
-          - 25.0.4_7-jre
-          - 25.0.4_7-jdk
+        temurin_tag: ${{ fromJSON(needs.tags.outputs.temurin_tags) }}
 
     runs-on: ubuntu-latest
     env:
@@ -36,7 +40,7 @@ jobs:
         with:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          BASE_TAG: ${{ matrix.TEMURIN_TAG }}
+          BASE_TAG: ${{ matrix.temurin_tag }}
           TAG_NAME: TEMURIN_TAG
           IMAGE_NAME: dwolla/java
       - name: Set up Snyk CLI
@@ -49,19 +53,12 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   scan:
+    needs: tags
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     strategy:
       fail-fast: false
       matrix:
-        temurin_tag:
-          - 11.0.32_9-jre
-          - 11.0.32_9-jdk
-          - 17.0.20_8-jre
-          - 17.0.20_8-jdk
-          - 21.0.12_8-jre
-          - 21.0.12_8-jdk
-          - 25.0.4_7-jre
-          - 25.0.4_7-jdk
+        temurin_tag: ${{ fromJSON(needs.tags.outputs.temurin_tags) }}
 
     runs-on: ubuntu-latest
     env:
